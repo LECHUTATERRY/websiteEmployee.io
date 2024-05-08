@@ -1,0 +1,41 @@
+<?php
+session_start();
+
+// Check if the user is logged in and is an administrator
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION['is_admin'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+
+// Database connection credentials
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "employee_time_tracking";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Query to fetch all time entries
+$sql = "SELECT users.username, time_entries.time_of_entry FROM time_entries 
+        JOIN users ON time_entries.employee_id = users.id";
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    // Output data of each row
+    echo "<table><tr><th>Username</th><th>Time of Entry</th></tr>";
+    while($row = $result->fetch_assoc()) {
+        echo "<tr><td>" . htmlspecialchars($row['username']) . "</td><td>" . $row['time_of_entry'] . "</td></tr>";
+    }
+    echo "</table>";
+} else {
+    echo "0 results";
+}
+
+$conn->close();
+?>
